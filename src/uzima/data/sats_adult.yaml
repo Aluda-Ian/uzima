@@ -1,0 +1,130 @@
+# South African Triage Scale (SATS) — adult chart, as used by Uzima.
+#
+# SOURCE: South African Triage Scale (SATS) Training Manual, Emergency Medicine
+# Society of South Africa (EMSSA), 2012 — adult chart (patients > 12 years or
+# taller than 150 cm). Transcribed by hand for this prototype.
+#
+# VERIFICATION STATUS: NOT CLINICALLY VERIFIED. Every band and discriminator
+# below must be checked line by line against the official EMSSA manual by a
+# clinician before this file is used anywhere near a real patient.
+#
+# Rules marked `local_protocol: true` are NOT part of core SATS. They are
+# facility add-ons a site can switch off.
+
+scale_id: SATS-ADULT
+scale_name: South African Triage Scale (adult)
+source: "SATS Training Manual (EMSSA, 2012), adult TEWS + discriminator chart"
+verification_status: "Transcribed for a prototype; not clinically verified"
+min_age_years: 12
+
+colours:
+  RED:    {rank: 4, label: Emergency,    target_minutes: 0}
+  ORANGE: {rank: 3, label: Very urgent,  target_minutes: 10}
+  YELLOW: {rank: 2, label: Urgent,       target_minutes: 60}
+  GREEN:  {rank: 1, label: Routine,      target_minutes: 240}
+
+# Triage Early Warning Score (TEWS). Ranges are [lo, hi): lo inclusive,
+# hi exclusive; null means open-ended.
+tews:
+  bands:
+    - {lo: 0, hi: 3,    colour: GREEN}
+    - {lo: 3, hi: 5,    colour: YELLOW}
+    - {lo: 5, hi: 7,    colour: ORANGE}
+    - {lo: 7, hi: null, colour: RED}
+  numeric:
+    rr:        # respiratory rate, breaths/min
+      label: Respiratory rate
+      ranges:
+        - {lo: null, hi: 9,  points: 2, text: "less than 9"}
+        - {lo: 9,  hi: 15,   points: 0, text: "9-14"}
+        - {lo: 15, hi: 21,   points: 1, text: "15-20"}
+        - {lo: 21, hi: 30,   points: 2, text: "21-29"}
+        - {lo: 30, hi: null, points: 3, text: "more than 29"}
+    hr:        # heart rate, beats/min
+      label: Heart rate
+      ranges:
+        - {lo: null, hi: 41,  points: 2, text: "less than 41"}
+        - {lo: 41,  hi: 51,   points: 1, text: "41-50"}
+        - {lo: 51,  hi: 101,  points: 0, text: "51-100"}
+        - {lo: 101, hi: 111,  points: 1, text: "101-110"}
+        - {lo: 111, hi: 130,  points: 2, text: "111-129"}
+        - {lo: 130, hi: null, points: 3, text: "more than 129"}
+    sbp:       # systolic blood pressure, mmHg
+      label: Systolic BP
+      ranges:
+        - {lo: null, hi: 71,  points: 3, text: "less than 71"}
+        - {lo: 71,  hi: 81,   points: 2, text: "71-80"}
+        - {lo: 81,  hi: 101,  points: 1, text: "81-100"}
+        - {lo: 101, hi: 200,  points: 0, text: "101-199"}
+        - {lo: 200, hi: null, points: 2, text: "more than 199"}
+    temp_c:    # temperature, degrees C
+      label: Temperature
+      ranges:
+        - {lo: null, hi: 35,   points: 2, text: "cold / under 35"}
+        - {lo: 35,  hi: 38.5,  points: 0, text: "35-38.4"}
+        - {lo: 38.5, hi: null, points: 2, text: "hot / over 38.4"}
+  categorical:
+    mobility:
+      label: Mobility
+      values: {walking: 0, with_help: 1, stretcher: 2}
+    avpu:
+      label: AVPU
+      values: {A: 0, C: 1, V: 1, P: 2, U: 3}
+      text: {A: Alert, C: Confused (new), V: Reacts to voice, P: Reacts to pain, U: Unresponsive}
+    trauma:
+      label: Trauma
+      values: {"no": 0, "yes": 1}
+
+# Measured-value rules (applied from vitals, not from the complaint).
+measured_rules:
+  - id: SATS.EMERGENCY.hypoglycaemia
+    field: glucose_mmol
+    op: lt
+    value: 3.0
+    colour: RED
+    label: "Hypoglycaemia - glucose less than 3 mmol/L"
+  - id: LOCAL.spo2_low
+    field: spo2
+    op: lt
+    value: 92
+    colour: ORANGE
+    label: "SpO2 below 92% (facility add-on, not core SATS)"
+    local_protocol: true
+
+# Clinical discriminators. `keywords` is ONLY used by the scripted baseline
+# planner (plain English substring match, no negation handling). The LLM agent
+# picks codes itself and must quote verbatim evidence from the intake text.
+# Each keyword entry is a list of terms that must ALL appear.
+discriminators:
+  # --- Emergency signs -> RED
+  - {code: airway_compromised,   colour: RED, label: "Airway - compromised",            keywords: [[choking], [stridor], [airway]]}
+  - {code: breathing_inadequate, colour: RED, label: "Breathing - not adequate",        keywords: [[not breathing], [gasping]]}
+  - {code: seizure_current,      colour: RED, label: "Seizure - current",               keywords: [[fitting now], [seizing], [convulsing]]}
+  - {code: burn_facial_inhalation, colour: RED, label: "Burn - facial / inhalation",    keywords: [[burn, face], [smoke inhalation]]}
+  - {code: cardiac_arrest,       colour: RED, label: "Cardiac arrest",                  keywords: [[no pulse], [collapsed, not breathing]]}
+  # --- Very urgent -> ORANGE
+  - {code: sob_acute,            colour: ORANGE, label: "Shortness of breath - acute",  keywords: [[short of breath], [shortness of breath], [difficulty breathing]]}
+  - {code: coughing_blood,       colour: ORANGE, label: "Coughing blood",               keywords: [[coughing blood], [coughing up blood]]}
+  - {code: chest_pain,           colour: ORANGE, label: "Chest pain",                   keywords: [[chest pain]]}
+  - {code: haemorrhage_uncontrolled, colour: ORANGE, label: "Haemorrhage - uncontrolled", keywords: [[bleeding heavily], [uncontrolled bleeding]]}
+  - {code: seizure_post_ictal,   colour: ORANGE, label: "Seizure - post-ictal",         keywords: [[after a fit], [had a seizure], [post-ictal]]}
+  - {code: focal_neurology_acute, colour: ORANGE, label: "Focal neurology - acute",     keywords: [[weakness, one side], [slurred speech], [face drooping]]}
+  - {code: loc_reduced,          colour: ORANGE, label: "Level of consciousness reduced", keywords: [[drowsy], [unconscious]]}
+  - {code: psychosis_aggression, colour: ORANGE, label: "Psychosis / aggression",       keywords: [[aggressive], [psychotic]]}
+  - {code: threatened_limb,      colour: ORANGE, label: "Threatened limb",              keywords: [[cold, limb], [no pulse in]]}
+  - {code: dislocation_large_joint, colour: ORANGE, label: "Dislocation - larger joint (not finger or toe)", keywords: [[dislocated shoulder], [dislocated hip], [dislocated knee]]}
+  - {code: fracture_compound,    colour: ORANGE, label: "Fracture - compound",          keywords: [[bone sticking out], [open fracture]]}
+  - {code: burn_major,           colour: ORANGE, label: "Burn - over 20% / electrical / circumferential / chemical", keywords: [[electrical burn], [chemical burn]]}
+  - {code: poisoning_overdose,   colour: ORANGE, label: "Poisoning / overdose",         keywords: [[overdose], [poison], [swallowed]]}
+  - {code: vomiting_fresh_blood, colour: ORANGE, label: "Vomiting fresh blood",         keywords: [[vomiting blood]]}
+  - {code: pregnancy_abdo_pain_or_trauma, colour: ORANGE, label: "Pregnancy and abdominal pain or abdominal trauma", keywords: [[pregnan, abdominal pain], [pregnan, stomach pain]]}
+  - {code: pain_severe,          colour: ORANGE, label: "Pain - severe",                keywords: [[severe pain], [10/10]]}
+  # --- Urgent -> YELLOW
+  - {code: haemorrhage_controlled, colour: YELLOW, label: "Haemorrhage - controlled",   keywords: [[bleeding stopped]]}
+  - {code: dislocation_finger_toe, colour: YELLOW, label: "Dislocation - finger or toe", keywords: [[dislocated finger], [dislocated toe]]}
+  - {code: fracture_closed,      colour: YELLOW, label: "Fracture - closed",            keywords: [[fracture], [broken]]}
+  - {code: burn_other,           colour: YELLOW, label: "Burn - other",                 keywords: [[burn]]}
+  - {code: abdominal_pain,       colour: YELLOW, label: "Abdominal pain",               keywords: [[abdominal pain], [stomach pain]]}
+  - {code: vomiting_persistent,  colour: YELLOW, label: "Vomiting - persistent",        keywords: [[vomiting]]}
+  - {code: pregnancy_trauma,     colour: YELLOW, label: "Pregnancy and trauma",         keywords: [[pregnan, fell], [pregnan, accident]]}
+  - {code: pain_moderate,        colour: YELLOW, label: "Pain - moderate",              keywords: [[moderate pain]]}

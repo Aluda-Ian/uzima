@@ -1,0 +1,23 @@
+# EXAMPLE department routing table for a Kenyan level-4/5 public hospital OPD.
+# Replace with your own facility's departments. Rules are checked top to
+# bottom; the first match wins. Every routing proposal cites the rule id.
+facility: "Example county referral hospital OPD (synthetic)"
+rules:
+  - id: ROUTE.resus
+    department: Resuscitation / Emergency bay
+    when: {colour_in: [RED]}
+  - id: ROUTE.maternity
+    department: Maternity assessment
+    when: {pregnant: true}
+  - id: ROUTE.emergency_orange
+    department: Emergency / Casualty (doctor review)
+    when: {colour_in: [ORANGE]}
+  - id: ROUTE.casualty_trauma
+    department: Casualty (minor trauma & procedures)
+    when: {trauma: true}
+  - id: ROUTE.mental_health
+    department: Mental health clinic
+    when: {discriminator_in: [psychosis_aggression]}
+  - id: ROUTE.general_opd
+    department: General OPD (clinical officer)
+    when: {}

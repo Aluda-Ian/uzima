@@ -1,0 +1,14 @@
+{
+  "patient_ref": "DESK-0815",
+  "age_years": 48,
+  "complaint": "Severe headache since last night, vomiting twice, says the left arm feels weak",
+  "nurse_notes": "Walked in with relative",
+  "mobility": "walking",
+  "rr": 18,
+  "hr": 88,
+  "sbp": 186,
+  "temp_c": 36.9,
+  "avpu": "A",
+  "trauma": false,
+  "spo2": 97
+}

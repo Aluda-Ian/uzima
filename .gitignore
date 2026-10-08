@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+*.db
+uzima-mcp-stderr.log
+.pytest_cache/
+dist/
